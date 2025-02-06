@@ -1,11 +1,4 @@
-import {
-  View,
-  ScrollView,
-  Text,
-  StyleSheet,
-  Image,
-  Button,
-} from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Image } from 'react-native';
 import { useLayoutEffect } from 'react';
 
 import { MEALS } from '../data/dummy-data';
@@ -13,15 +6,30 @@ import MealDetails from '../components/MealDetails';
 import Subtitle from '../components/MealDetail/Subtitle';
 import List from '../components/MealDetail/List';
 import IconButton from '../components/IconButton';
+import { useSelector, useDispatch } from 'react-redux';
+import { addFavourite, removeFavourite } from '../store/redux/favourites';
+// import { FavoritesContext } from '../store/context/favorites-context';
 
 export default function MealDetailsScreen({ route, navigation }) {
+  // const favouriteMealsContext = useContext(FavoritesContext);
+  const favouriteMealIds = useSelector(state => state.favouriteMeals.ids);
+  const dispatch = useDispatch();
+
   const mealId = route.params.mealId;
   const mealTitle = route.params.mealTitle;
 
   const selectedMeal = MEALS.find(meal => meal.id === mealId);
 
-  function headerButtonPressHandler() {
-    console.log('Marked as favorite!');
+  const isFavorite = favouriteMealIds.includes(mealId);
+
+  function toggleFavourite() {
+    if (isFavorite) {
+      dispatch(removeFavourite({ id: mealId }));
+      // favouriteMealsContext.removeFavorite(mealId);
+    } else {
+      // favouriteMealsContext.addFavorite(mealId);
+      dispatch(addFavourite({ id: mealId }));
+    }
   }
 
   useLayoutEffect(() => {
@@ -30,14 +38,14 @@ export default function MealDetailsScreen({ route, navigation }) {
       headerRight: () => {
         return (
           <IconButton
-            icon="star"
+            icon={isFavorite ? 'star' : 'star-outline'}
             color="white"
-            onPress={headerButtonPressHandler}
+            onPress={toggleFavourite}
           />
         );
       },
     });
-  }, [navigation, headerButtonPressHandler, mealTitle]);
+  }, [navigation, toggleFavourite, mealTitle]);
 
   return (
     <ScrollView
